@@ -16,6 +16,7 @@ import { TransactionEntity } from '../transaction/transaction.entity';
 export enum ReferralTypeEnum {
     CARD = 'card',
     AGENCY = 'agency',
+    COLABORATOR = 'colaborator',
 }
 
 @Entity('referral')

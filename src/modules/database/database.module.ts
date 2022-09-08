@@ -17,8 +17,8 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
         database: configService.get('POSTGRES_DB'),
         autoLoadEntities: true,
         entities: [],
-        synchronize: false, // production
-        // synchronize: true,
+        // synchronize: false, // production
+        synchronize: true,
         namingStrategy: new SnakeNamingStrategy(),
         ssl: {
           ca: configService.get('CA_CERT'),

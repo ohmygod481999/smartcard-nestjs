@@ -12,15 +12,27 @@ import {
 } from 'typeorm';
 import { AccountEntity } from '../account/account.entity';
 
-@Entity("agency")
-export class AgencyEntity extends BaseEntity{
+export enum AgencyType {
+    AGENCY = 'agency',
+    COLABORATOR = 'colaborator',
+}
+
+@Entity('agency')
+export class AgencyEntity extends BaseEntity {
     @PrimaryColumn()
     public id: string;
 
     @Column({
-        nullable: false
+        enum: AgencyType,
+        default: AgencyType.AGENCY
     })
-    account_id: number
+    type: AgencyType
+
+
+    @Column({
+        nullable: false,
+    })
+    account_id: number;
 
     // @OneToOne(() => AccountEntity)
     @OneToOne(() => AccountEntity, (account) => account.agency)

@@ -99,12 +99,14 @@ export class AccountController {
                 card_id: cardId,
             });
 
-            if (refererId) {
-                await this.referralService.rewardCardReferer(
-                    refererId,
-                    newAccount.id,
-                );
-            }
+            // khi đăng ký thành công, chưa thưởng vội
+
+            // if (refererId) {
+            //     await this.referralService.rewardCardReferer(
+            //         refererId,
+            //         newAccount.id,
+            //     );
+            // }
 
             // Reward user 300k -> vi phu
             await this.secondaryTransactionService.create({

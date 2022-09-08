@@ -107,7 +107,8 @@ export class AccountService {
                 account.referer_id as referer_id,
                 account.email as email,
                 a1.id as agency_id,
-                a1.join_at as join_at
+                a1.join_at as join_at,
+                a1.type as type
             from account
             left join agency a1 on account.id = a1.account_id
             where
@@ -118,7 +119,8 @@ export class AccountService {
                     a.referer_id as referer_id,
                     a.email as email,
                     a2.id as agency_id,
-                    a2.join_at as join_at
+                    a2.join_at as join_at,
+                    a2.type as type
                 from
                     account a
                 left join agency a2 on a.id = a2.account_id

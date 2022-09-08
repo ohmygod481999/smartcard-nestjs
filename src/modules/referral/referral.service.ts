@@ -17,10 +17,12 @@ import {
     TransactionTargetType,
     TransactionTypeEnum,
 } from '../transaction/transaction.entity';
+import { AgencyType } from '../agency/agency.entity';
 
 @Injectable()
 export class ReferralService {
     F1_NO_AGENCY_PERCENT = 0.2;
+    F1_COLABORATOR_PERCENT = 0.25;
     CARD_PRICE = 300000;
     AGENCY_BASE_REWARD = 2000000;
 
@@ -55,6 +57,7 @@ export class ReferralService {
         return percentMapping[level];
     }
 
+    // thuởng cho cộng tác viên, phải duyệt !!!
     async rewardCardReferer(referer_id: number, referee_id: number) {
         const ancestors = await this.accountService.getAncestors(referer_id);
 
@@ -104,11 +107,20 @@ export class ReferralService {
         );
     }
 
-    // thưởng cho 10 tầng trên khi 1 đại lý kích hoạt thành công
-    async rewardAgencyReferer(referer_id: number, referee_id: number) {
+    // thưởng cho 10 tầng trên khi 1 đại lý hoặc cộng tác viên kích hoạt thành công
+    async rewardAgencyReferer(
+        referer_id: number,
+        referee_id: number,
+        agencyType: AgencyType,
+    ) {
         const ancestors = await this.accountService.getAncestors(referer_id);
 
         const rootAccount = await this.accountService.getRootAccount();
+
+        const baseReward =
+            agencyType === AgencyType.AGENCY
+                ? this.AGENCY_BASE_REWARD
+                : this.CARD_PRICE;
 
         await Promise.all(
             ancestors.map(async (ancestor, i) => {
@@ -121,14 +133,24 @@ export class ReferralService {
                 }
 
                 let amount = 0;
-                if (!agency && level === 1) {
-                    amount =
-                        this.AGENCY_BASE_REWARD * this.F1_NO_AGENCY_PERCENT;
-                } else if (agency) {
-                    amount =
-                        this.AGENCY_BASE_REWARD *
-                        this.getPercentAncestors(level);
+
+                if (!agency) return;
+
+                // Thưởng nếu ng đó là cộng tác viên và ở tầng 1
+                if (agency.type === AgencyType.COLABORATOR && level === 1) {
+                    amount = baseReward * this.F1_COLABORATOR_PERCENT;
+                } else if (agency.type === AgencyType.AGENCY) {
+                    amount = baseReward * this.getPercentAncestors(level);
                 }
+
+                // if (!agency && level === 1) {
+                //     amount =
+                //         this.AGENCY_BASE_REWARD * this.F1_NO_AGENCY_PERCENT;
+                // } else if (agency) {
+                //     amount =
+                //         this.AGENCY_BASE_REWARD *
+                //         this.getPercentAncestors(level);
+                // }
 
                 if (amount === 0) {
                     return;
@@ -139,7 +161,10 @@ export class ReferralService {
                     status: TransactionStatusEnum.SUCCESS,
                     source_id: rootAccount.id,
                     target_id: id,
-                    type: TransactionTypeEnum.REWARD_REFER_AGENCY,
+                    type:
+                        agencyType === AgencyType.AGENCY
+                            ? TransactionTypeEnum.REWARD_REFER_AGENCY
+                            : TransactionTypeEnum.REWARD_REFER_COLABORATOR,
                 });
 
                 const createReferralDto: CreateReferralDto = {
@@ -147,14 +172,18 @@ export class ReferralService {
                     referee_id,
                     referer_id: referer_id,
                     transaction_id: transaction.id,
-                    type: ReferralTypeEnum.AGENCY,
+                    type:
+                        agencyType === AgencyType.AGENCY
+                            ? ReferralTypeEnum.AGENCY
+                            : ReferralTypeEnum.COLABORATOR,
+                    target_agency_id: agency.id,
                 };
 
-                if (agency) {
-                    createReferralDto.target_agency_id = agency.id;
-                } else {
-                    createReferralDto.target_id = id;
-                }
+                // if (agency) {
+                //     createReferralDto.target_agency_id = agency.id;
+                // } else {
+                //     createReferralDto.target_id = id;
+                // }
 
                 const referral = await this.create(createReferralDto);
             }),

@@ -62,6 +62,9 @@ export class AccountEntity extends BaseEntity {
     @OneToOne(() => AgencyEntity, (agency) => agency.account)
     agency: AgencyEntity;
 
+    // @OneToOne(() => ColaboratorEntity, (colaborator) => colaborator.account)
+    // colaborator: ColaboratorEntity;
+
     // @OneToOne(() => VendorEntity, (vendor) => vendor.account)
     // vendor: VendorEntity;
 

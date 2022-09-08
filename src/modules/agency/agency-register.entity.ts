@@ -10,6 +10,7 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 import { AccountEntity } from '../account/account.entity';
+import { AgencyType } from './agency.entity';
 
 export enum AgencyRegisterStatus {
     CREATED = 'created',
@@ -26,6 +27,12 @@ export class AgencyRegisterEntity extends BaseEntity {
         nullable: true,
     })
     account_id: number;
+
+    @Column({
+        enum: AgencyType,
+        default: AgencyType.AGENCY
+    })
+    type: AgencyType
 
     @ManyToOne(() => AccountEntity)
     @JoinColumn({

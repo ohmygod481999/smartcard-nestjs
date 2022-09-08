@@ -4,13 +4,17 @@ import {
     Get,
     HttpException,
     HttpStatus,
+    Param,
     Post,
 } from '@nestjs/common';
 import { ResponseDto } from 'src/shared/dto/responseDto';
 import { AccountService } from '../account/account.service';
 import { ReferralService } from '../referral/referral.service';
-import { AgencyRegisterStatus } from './agency-register.entity';
-import { AgencyEntity } from './agency.entity';
+import {
+    AgencyRegisterEntity,
+    AgencyRegisterStatus,
+} from './agency-register.entity';
+import { AgencyEntity, AgencyType } from './agency.entity';
 import { AgencyService } from './agency.service';
 import { AcceptAgencyDto } from './dto/acceptAgencyDto';
 import { CreateAgencyDto } from './dto/createAgencyDto';
@@ -29,11 +33,20 @@ export class AgencyController {
         return this.agencyService.findAll();
     }
 
+    @Get(':id')
+    getAgency(@Param() params): Promise<AgencyRegisterEntity> {
+        return this.agencyService.findAgencyRegisterOne({
+            id: parseInt(params.id),
+        });
+    }
+
     @Post('/accept')
     async accept(@Body() acceptAgencyDto: AcceptAgencyDto) {
         const agencyRegister = await this.agencyService.findAgencyRegisterOne({
             id: acceptAgencyDto.agency_register_id,
         });
+
+        console.log(agencyRegister)
 
         if (!agencyRegister) {
             throw new HttpException(
@@ -63,19 +76,24 @@ export class AgencyController {
         if (acceptAgencyDto.accept === true) {
             const agency = await this.agencyService.create({
                 account_id: agencyRegister.account_id,
+                type: agencyRegister.type,
             });
 
-            // Đồng ý làm đại lý
+            // Đồng ý làm đại lý or CTV
             this.agencyService.updateStatusAgencyRegister(
                 acceptAgencyDto.agency_register_id,
                 AgencyRegisterStatus.ACCEPTED,
             );
 
+            // Nếu có người giới thiệu bên trên
             if (referee.referer) {
                 await this.referalService.rewardAgencyReferer(
                     referee.referer.id,
                     referee.id,
+                    agencyRegister.type,
                 );
+                // if (agencyRegister.type === AgencyType.AGENCY) {
+                // }
             }
             return new ResponseDto(agency, true);
         } else {

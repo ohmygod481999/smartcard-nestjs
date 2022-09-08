@@ -20,6 +20,7 @@ export enum TransactionStatusEnum {
 export enum TransactionTypeEnum {
     REWARD_REFER = 'reward-refer',
     REWARD_REFER_AGENCY = 'reward-refer-agency',
+    REWARD_REFER_COLABORATOR = 'reward-refer-colaborator',
     TRANSFER = 'transfer',
     PAYMENT = 'payment',
     WITHDRAW = 'withdraw',

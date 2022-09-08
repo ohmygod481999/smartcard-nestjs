@@ -43,7 +43,7 @@ import { VendorModule } from './modules/vendor/vendor.module';
         WalletModule,
         StorageModule,
         ResumeModule,
-        VendorModule
+        VendorModule,
     ],
     controllers: [AppController],
     providers: [AppService],

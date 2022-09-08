@@ -77,6 +77,7 @@ export class AgencyService {
         }
 
         agency.id = agencyId;
+        agency.type = createAgencyDto.type;
 
         await agency.save();
 
@@ -88,7 +89,8 @@ export class AgencyService {
     ): Promise<AgencyRegisterEntity> {
         const existRegister = await this.findAgencyRegisterOne({
             account_id: registerAgencyDto.account_id,
-            status: Not(AgencyRegisterStatus.REFUSED)
+            type: registerAgencyDto.type,
+            status: Not(AgencyRegisterStatus.REFUSED),
         });
         if (existRegister) {
             throw new HttpException(
@@ -100,6 +102,7 @@ export class AgencyService {
             AgencyRegisterEntity.create();
 
         agencyRegister.account_id = registerAgencyDto.account_id;
+        agencyRegister.type = registerAgencyDto.type;
         agencyRegister.status = AgencyRegisterStatus.CREATED;
 
         await agencyRegister.save();
