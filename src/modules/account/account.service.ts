@@ -100,17 +100,43 @@ export class AccountService {
             );
         }
 
-        const descendants = await this.dataSource.manager
-            .getTreeRepository(AccountEntity)
-            .createDescendantsQueryBuilder('account', 'accountClosure', account)
-            .leftJoinAndSelect('account.agency', 'agency')
-            .orderBy('account.referer_id', 'ASC')
-            .getMany();
+        const descendants = await this.dataSource.manager.query(`
+        with recursive temp_table as (
+            select
+                account.id as id,
+                account.referer_id as referer_id,
+                account.email as email,
+                a1.id as agency_id,
+                a1.join_at as join_at
+            from account
+            left join agency a1 on account.id = a1.account_id
+            where
+                account.id = ${account_id}
+            union
+                select
+                    a.id as id,
+                    a.referer_id as referer_id,
+                    a.email as email,
+                    a2.id as agency_id,
+                    a2.join_at as join_at
+                from
+                    account a
+                left join agency a2 on a.id = a2.account_id
+                inner join temp_table s on s.id = a.referer_id
+        ) select * from temp_table 
+        `)
+        
+            console.log(descendants)
+            // .getTreeRepository(AccountEntity)
+            // .createDescendantsQueryBuilder('account', 'accountClosure', account)
+            // .leftJoinAndSelect('account.agency', 'agency')
+            // // .orderBy('account.mpath', 'ASC')
+            // .getMany();
 
-        if (descendants.length > 1 && descendants[descendants.length - 1].id === account_id) {
-            // descendants.splice(descendants.length - 1, 1)
-            this.helperService.swapArray(descendants, descendants.length - 1, 0);
-        }
+        // if (descendants.length > 1 && descendants[descendants.length - 1].id === account_id) {
+        //     // descendants.splice(descendants.length - 1, 1)
+        //     this.helperService.swapArray(descendants, descendants.length - 1, 0);
+        // }
         // console.log(descendants)
         return descendants;
     }
