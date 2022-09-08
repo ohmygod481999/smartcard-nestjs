@@ -27,4 +27,7 @@ export class CreateTransactionDto {
 
     @IsString()
     order_id?: string;
+
+    @IsString()
+    note?: string;
 }

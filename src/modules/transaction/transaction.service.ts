@@ -43,6 +43,10 @@ export class TransactionService {
         newTransaction.amount = createTransactionDto.amount;
         newTransaction.type = createTransactionDto.type;
         
+        if (createTransactionDto.note) {
+            newTransaction.note = createTransactionDto.note;
+        }
+        
         if (createTransactionDto.vendor_id) {
             newTransaction.vendor_id = createTransactionDto.vendor_id;
         }

@@ -100,6 +100,12 @@ export class TransactionEntity extends BaseEntity {
     })
     amount: number;
 
+    // note
+    @Column({
+        nullable: true
+    })
+    note: string;
+
     // Date
     @CreateDateColumn({
         type: 'timestamp with time zone',

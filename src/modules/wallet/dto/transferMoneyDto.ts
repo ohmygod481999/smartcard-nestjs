@@ -1,4 +1,4 @@
-import { IsNumber } from "class-validator";
+import { IsNumber, IsString } from "class-validator";
 
 export class TransferMoneyDto {
     @IsNumber()
@@ -9,4 +9,7 @@ export class TransferMoneyDto {
 
     @IsNumber()
     amount: number;
+
+    @IsString()
+    note: string;
 }

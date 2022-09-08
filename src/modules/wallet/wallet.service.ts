@@ -136,7 +136,7 @@ export class WalletService {
     async transferMoney(
         transferMoneyDto: TransferMoneyDto,
     ): Promise<TransactionEntity> {
-        const { source_id, target_id, amount } = transferMoneyDto;
+        const { source_id, target_id, amount, note } = transferMoneyDto;
         const sourceAccount = await this.accountService.findOne(source_id);
 
         if (!sourceAccount) {
@@ -174,6 +174,7 @@ export class WalletService {
             target_id,
             type: TransactionTypeEnum.TRANSFER,
             status: TransactionStatusEnum.SUCCESS,
+            note,
         });
 
         return transaction;
