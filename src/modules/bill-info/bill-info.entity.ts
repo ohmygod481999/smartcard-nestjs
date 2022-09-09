@@ -10,42 +10,38 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 import { AccountEntity } from '../account/account.entity';
-import { AgencyType } from './agency.entity';
 
-export enum AgencyRegisterStatus {
-    CREATED = 'created',
-    ACCEPTED = 'accepted',
-    REFUSED = 'refused',
+export enum BillInfoType {
+    ELECTRIC = 'electric',
 }
 
-@Entity('agency_register')
-export class AgencyRegisterEntity extends BaseEntity {
+@Entity('bill_info')
+export class BillInfoEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     public id: number;
 
     @Column({
-        nullable: true,
+        type: 'enum',
+        enum: BillInfoType,
+    })
+    type: BillInfoType;
+
+    @Column({
+        nullable: false,
     })
     account_id: number;
 
-    @Column({
-        type: 'enum',
-        enum: AgencyType,
-        default: AgencyType.AGENCY,
-    })
-    type: AgencyType;
-
     @ManyToOne(() => AccountEntity)
+    // @ManyToOne(() => AccountEntity, (account) => account.account_info)
     @JoinColumn({
         name: 'account_id',
     })
     account: AccountEntity;
 
     @Column({
-        type: 'enum',
-        enum: AgencyRegisterStatus,
+        type: 'jsonb',
     })
-    status: AgencyRegisterStatus;
+    payload: any;
 
     @CreateDateColumn({
         type: 'timestamp with time zone',

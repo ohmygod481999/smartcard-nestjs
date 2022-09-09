@@ -20,6 +20,7 @@ import { WalletModule } from './modules/wallet/wallet.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { ResumeModule } from './modules/resume/resume.module';
 import { VendorModule } from './modules/vendor/vendor.module';
+import { BillInfoModule } from './modules/bill-info/bill-info.module';
 
 @Module({
     imports: [
@@ -44,6 +45,7 @@ import { VendorModule } from './modules/vendor/vendor.module';
         StorageModule,
         ResumeModule,
         VendorModule,
+        BillInfoModule
     ],
     controllers: [AppController],
     providers: [AppService],
