@@ -108,11 +108,11 @@ export class AccountController {
             //     );
             // }
 
-            // Reward user 300k -> vi phu
-            await this.secondaryTransactionService.create({
-                account_id: newAccount.id,
-                amount: 300000,
-            });
+            // Reward user 300k -> vi phu chi khi la CTV
+            // await this.secondaryTransactionService.create({
+            //     account_id: newAccount.id,
+            //     amount: 300000,
+            // });
 
             return new ResponseDto(regRes.data, true);
         } catch (err) {

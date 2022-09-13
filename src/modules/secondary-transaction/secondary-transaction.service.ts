@@ -35,7 +35,7 @@ export class SecondaryTransactionService {
 
         newTransaction.account_id = createSecondaryTransactionDto.account_id;
         newTransaction.amount = createSecondaryTransactionDto.amount;
-        newTransaction.type = SecondaryTransactionType.DEFAULT
+        newTransaction.type = createSecondaryTransactionDto.type
 
         await newTransaction.save();
 

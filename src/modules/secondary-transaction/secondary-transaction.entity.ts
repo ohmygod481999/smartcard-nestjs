@@ -12,7 +12,8 @@ import {
 import { AccountEntity } from '../account/account.entity';
 
 export enum SecondaryTransactionType {
-    DEFAULT = 'default',
+    DEFAULT = 'default', // Thưởng CTV mới
+    REWARD_NEW_AGENCY = 'reward_new_agency', // Thưởng Đại lý mới
 }
 
 @Entity('secondary_transaction')

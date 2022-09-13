@@ -10,6 +10,8 @@ import {
 import { ResponseDto } from 'src/shared/dto/responseDto';
 import { AccountService } from '../account/account.service';
 import { ReferralService } from '../referral/referral.service';
+import { SecondaryTransactionType } from '../secondary-transaction/secondary-transaction.entity';
+import { SecondaryTransactionService } from '../secondary-transaction/secondary-transaction.service';
 import {
     AgencyRegisterEntity,
     AgencyRegisterStatus,
@@ -26,6 +28,7 @@ export class AgencyController {
         private readonly agencyService: AgencyService,
         private readonly referalService: ReferralService,
         private readonly accountService: AccountService,
+        private readonly secondaryTransactionService: SecondaryTransactionService,
     ) {}
 
     @Get()
@@ -46,7 +49,7 @@ export class AgencyController {
             id: acceptAgencyDto.agency_register_id,
         });
 
-        console.log(agencyRegister)
+        console.log(agencyRegister);
 
         if (!agencyRegister) {
             throw new HttpException(
@@ -74,10 +77,27 @@ export class AgencyController {
         }
 
         if (acceptAgencyDto.accept === true) {
+            // Create agency với type: agencyRegister.type
             const agency = await this.agencyService.create({
                 account_id: agencyRegister.account_id,
                 type: agencyRegister.type,
             });
+
+            // reward vào ví phụ
+
+            if (agencyRegister.type === AgencyType.AGENCY) {
+                await this.secondaryTransactionService.create({
+                    account_id: agencyRegister.account_id,
+                    amount: 2000000,
+                    type: SecondaryTransactionType.REWARD_NEW_AGENCY,
+                });
+            } else if (agencyRegister.type === AgencyType.COLABORATOR) {
+                await this.secondaryTransactionService.create({
+                    account_id: agencyRegister.account_id,
+                    amount: 300000,
+                    type: SecondaryTransactionType.DEFAULT,
+                });
+            }
 
             // Đồng ý làm đại lý or CTV
             this.agencyService.updateStatusAgencyRegister(
