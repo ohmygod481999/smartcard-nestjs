@@ -37,6 +37,10 @@ export class AgencyService {
         return this.agencyRepository.findOneBy({ id });
     }
 
+    findOneByAccountId(account_id: number): Promise<AgencyEntity> {
+        return this.agencyRepository.findOneBy({ account_id });
+    }
+
     findAgencyRegisterOne(
         where: FindOptionsWhere<AgencyRegisterEntity>,
     ): Promise<AgencyRegisterEntity> {

@@ -76,12 +76,25 @@ export class AgencyController {
             );
         }
 
+        
         if (acceptAgencyDto.accept === true) {
-            // Create agency với type: agencyRegister.type
-            const agency = await this.agencyService.create({
-                account_id: agencyRegister.account_id,
-                type: agencyRegister.type,
-            });
+            const existAgency = await this.agencyService.findOneByAccountId(agencyRegister.account_id)
+
+            let agency;
+            // Tu CTV len dai ly
+            if (existAgency && existAgency.type === AgencyType.COLABORATOR && agencyRegister.type === AgencyType.AGENCY) {
+                existAgency.type = AgencyType.AGENCY
+                await existAgency.save()
+                agency = existAgency;
+            }
+            else {
+                // Create agency với type: agencyRegister.type
+                agency = await this.agencyService.create({
+                    account_id: agencyRegister.account_id,
+                    type: agencyRegister.type,
+                });
+            }
+
 
             // reward vào ví phụ
 

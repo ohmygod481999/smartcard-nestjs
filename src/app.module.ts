@@ -21,6 +21,7 @@ import { StorageModule } from './modules/storage/storage.module';
 import { ResumeModule } from './modules/resume/resume.module';
 import { VendorModule } from './modules/vendor/vendor.module';
 import { BillInfoModule } from './modules/bill-info/bill-info.module';
+import { ErpAccountModule } from './modules/erp-account/erp-account.module';
 
 @Module({
     imports: [
@@ -45,7 +46,8 @@ import { BillInfoModule } from './modules/bill-info/bill-info.module';
         StorageModule,
         ResumeModule,
         VendorModule,
-        BillInfoModule
+        BillInfoModule,
+        ErpAccountModule,
     ],
     controllers: [AppController],
     providers: [AppService],
