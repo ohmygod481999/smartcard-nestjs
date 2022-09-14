@@ -22,6 +22,14 @@ export class AccountService {
         return this.accountRepository.find();
     }
 
+    async findMaxId(): Promise<number> {
+        const max = await this.accountRepository
+            .createQueryBuilder('account')
+            .select('MAX(account.id)', 'max')
+            .execute();
+        return max[0].max;
+    }
+
     findOne(id: number): Promise<AccountEntity> {
         return this.accountRepository
             .createQueryBuilder('account')
@@ -53,6 +61,8 @@ export class AccountService {
         const account_info = await this.accountInfoService.create({});
 
         const account: AccountEntity = AccountEntity.create();
+        const maxId = await this.findMaxId();
+        account.id = maxId + 1;
         account.ory_id = createAccountDto.ory_id;
         account.email = createAccountDto.email;
         if (createAccountDto.referer) {
@@ -126,14 +136,14 @@ export class AccountService {
                 left join agency a2 on a.id = a2.account_id
                 inner join temp_table s on s.id = a.referer_id
         ) select * from temp_table 
-        `)
-        
-            console.log(descendants)
-            // .getTreeRepository(AccountEntity)
-            // .createDescendantsQueryBuilder('account', 'accountClosure', account)
-            // .leftJoinAndSelect('account.agency', 'agency')
-            // // .orderBy('account.mpath', 'ASC')
-            // .getMany();
+        `);
+
+        console.log(descendants);
+        // .getTreeRepository(AccountEntity)
+        // .createDescendantsQueryBuilder('account', 'accountClosure', account)
+        // .leftJoinAndSelect('account.agency', 'agency')
+        // // .orderBy('account.mpath', 'ASC')
+        // .getMany();
 
         // if (descendants.length > 1 && descendants[descendants.length - 1].id === account_id) {
         //     // descendants.splice(descendants.length - 1, 1)
@@ -150,7 +160,7 @@ export class AccountService {
                 is_root: true,
             })
             // .leftJoinAndSelect('account.vendor', 'vendor')
-            .getMany()
+            .getMany();
         // const rootAccounts = await this.accountRepository.findBy({
         //     is_root: true,
         // });
