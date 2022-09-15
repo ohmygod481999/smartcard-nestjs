@@ -138,6 +138,58 @@ export class AgencyController {
         }
     }
 
+    @Post('/accept-again')
+    async acceptAgain(@Body() acceptAgencyDto: AcceptAgencyDto) {
+        const agencyRegister = await this.agencyService.findAgencyRegisterOne({
+            id: acceptAgencyDto.agency_register_id,
+        });
+
+        console.log(agencyRegister);
+
+        if (!agencyRegister) {
+            throw new HttpException(
+                'Mã đăng ký không hợp lệ',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        const referee = await this.accountService.findOne(
+            agencyRegister.account_id,
+        );
+
+        if (!referee) {
+            throw new HttpException(
+                'Mã tài khoản không hợp lệ',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        
+        if (acceptAgencyDto.accept === true) {
+            const existAgency = await this.agencyService.findOneByAccountId(agencyRegister.account_id)
+
+            let agency = existAgency;
+
+            // Nếu có người giới thiệu bên trên
+            if (referee.referer) {
+                await this.referalService.rewardAgencyReferer(
+                    referee.referer.id,
+                    referee.id,
+                    agencyRegister.type,
+                );
+                // if (agencyRegister.type === AgencyType.AGENCY) {
+                // }
+            }
+            return new ResponseDto(agency, true);
+        } else {
+            this.agencyService.updateStatusAgencyRegister(
+                acceptAgencyDto.agency_register_id,
+                AgencyRegisterStatus.REFUSED,
+            );
+            return new ResponseDto({}, true, 'Đã từ chối');
+        }
+    }
+
     @Post('/register')
     async register(@Body() registerAgencyDto: RegisterAgencyDto) {
         const agencyRegister = this.agencyService.register(registerAgencyDto);
