@@ -58,54 +58,54 @@ export class ReferralService {
     }
 
     // thuởng cho cộng tác viên, phải duyệt !!!
-    async rewardCardReferer(referer_id: number, referee_id: number) {
-        const ancestors = await this.accountService.getAncestors(referer_id);
+    // async rewardCardReferer(referer_id: number, referee_id: number) {
+    //     const ancestors = await this.accountService.getAncestors(referer_id);
 
-        const rootAccount = await this.accountService.getRootAccount();
+    //     const rootAccount = await this.accountService.getRootAccount();
 
-        await Promise.all(
-            ancestors.map(async (ancestor, i) => {
-                const { agency, id, email } = ancestor;
-                // level of ancestor
-                const level = i + 1;
+    //     await Promise.all(
+    //         ancestors.map(async (ancestor, i) => {
+    //             const { type, id, email } = ancestor;
+    //             // level of ancestor
+    //             const level = i + 1;
 
-                let amount = 0;
-                if (!agency && level === 1) {
-                    amount = this.CARD_PRICE * this.F1_NO_AGENCY_PERCENT;
-                } else if (agency) {
-                    amount = this.CARD_PRICE * this.getPercentAncestors(level);
-                }
+    //             let amount = 0;
+    //             if (!agency && level === 1) {
+    //                 amount = this.CARD_PRICE * this.F1_NO_AGENCY_PERCENT;
+    //             } else if (agency) {
+    //                 amount = this.CARD_PRICE * this.getPercentAncestors(level);
+    //             }
 
-                if (amount === 0) {
-                    return;
-                }
+    //             if (amount === 0) {
+    //                 return;
+    //             }
 
-                const transaction = await this.transactionService.create({
-                    amount: amount,
-                    source_id: rootAccount.id,
-                    status: TransactionStatusEnum.SUCCESS,
-                    target_id: id,
-                    type: TransactionTypeEnum.REWARD_REFER,
-                });
+    //             const transaction = await this.transactionService.create({
+    //                 amount: amount,
+    //                 source_id: rootAccount.id,
+    //                 status: TransactionStatusEnum.SUCCESS,
+    //                 target_id: id,
+    //                 type: TransactionTypeEnum.REWARD_REFER,
+    //             });
 
-                const createReferralDto: CreateReferralDto = {
-                    level,
-                    referee_id,
-                    referer_id: referer_id,
-                    transaction_id: transaction.id,
-                    type: ReferralTypeEnum.CARD,
-                };
+    //             const createReferralDto: CreateReferralDto = {
+    //                 level,
+    //                 referee_id,
+    //                 referer_id: referer_id,
+    //                 transaction_id: transaction.id,
+    //                 type: ReferralTypeEnum.CARD,
+    //             };
 
-                if (agency) {
-                    createReferralDto.target_agency_id = agency.id;
-                } else {
-                    createReferralDto.target_id = id;
-                }
+    //             if (agency) {
+    //                 createReferralDto.target_agency_id = agency.id;
+    //             } else {
+    //                 createReferralDto.target_id = id;
+    //             }
 
-                const referral = await this.create(createReferralDto);
-            }),
-        );
-    }
+    //             const referral = await this.create(createReferralDto);
+    //         }),
+    //     );
+    // }
 
     // thưởng cho 10 tầng trên khi 1 đại lý hoặc cộng tác viên kích hoạt thành công
     async rewardAgencyReferer(
@@ -124,7 +124,7 @@ export class ReferralService {
 
         await Promise.all(
             ancestors.map(async (ancestor, i) => {
-                const { agency, id, email } = ancestor;
+                const { type, agency_id, id, email } = ancestor;
                 // level of ancestor
                 const level = i + 1;
 
@@ -134,12 +134,12 @@ export class ReferralService {
 
                 let amount = 0;
 
-                if (!agency) return;
+                if (!type || !agency_id) return;
 
                 // Thưởng nếu ng đó là cộng tác viên và ở tầng 1
-                if (agency.type === AgencyType.COLABORATOR && level === 1) {
+                if (type === AgencyType.COLABORATOR && level === 1) {
                     amount = baseReward * this.F1_COLABORATOR_PERCENT;
-                } else if (agency.type === AgencyType.AGENCY) {
+                } else if (type === AgencyType.AGENCY) {
                     amount = baseReward * this.getPercentAncestors(level);
                 }
 
@@ -176,7 +176,7 @@ export class ReferralService {
                         agencyType === AgencyType.AGENCY
                             ? ReferralTypeEnum.AGENCY
                             : ReferralTypeEnum.COLABORATOR,
-                    target_agency_id: agency.id,
+                    target_agency_id: agency_id,
                 };
 
                 // if (agency) {

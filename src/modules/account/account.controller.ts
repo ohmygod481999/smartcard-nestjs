@@ -146,15 +146,7 @@ export class AccountController {
                 HttpStatus.BAD_REQUEST,
             );
         }
-        const ancestors = await this.dataSource.manager
-            .getTreeRepository(AccountEntity)
-            .createAncestorsQueryBuilder('account', 'accountClosure', referer)
-            .leftJoinAndSelect('account.agency', 'agency')
-            .orderBy('account.referer_id', 'DESC')
-            .getMany();
-        if (ancestors.length > 1) {
-            this.helperService.swapArray(ancestors, 0, ancestors.length - 1);
-        }
+        const ancestors = await this.accountService.getAncestors(referer_id)
         return ancestors;
     }
 

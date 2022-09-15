@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { HelperService } from 'src/shared/services/helper.service';
 import { DataSource, Repository } from 'typeorm';
 import { AccountInfoService } from '../account-info/account-info.service';
+import { AgencyType } from '../agency/agency.entity';
 import { AccountEntity } from './account.entity';
 import { CreateAccountDto } from './dto/CreateAccountDto';
 
@@ -69,7 +70,14 @@ export class AccountService {
         await this.accountRepository.delete(id);
     }
 
-    async getAncestors(account_id: number): Promise<AccountEntity[]> {
+    async getAncestors(account_id: number): Promise<{
+        id: number;
+        referer_id: number | null;
+        email: string;
+        agency_id: string;
+        join_at: Date;
+        type: AgencyType
+    }[]> {
         const referer = await this.findOne(account_id);
 
         if (!referer) {
@@ -78,15 +86,33 @@ export class AccountService {
                 HttpStatus.BAD_REQUEST,
             );
         }
-        const ancestors = await this.dataSource.manager
-            .getTreeRepository(AccountEntity)
-            .createAncestorsQueryBuilder('account', 'accountClosure', referer)
-            .leftJoinAndSelect('account.agency', 'agency')
-            .orderBy('account.referer_id', 'DESC')
-            .getMany();
-        if (ancestors.length > 1) {
-            this.helperService.swapArray(ancestors, 0, ancestors.length - 1);
-        }
+        const ancestors = await this.dataSource.manager.query(`
+        with recursive temp_table as (
+            select
+                account.id as id,
+                account.referer_id as referer_id,
+                account.email as email,
+                a1.id as agency_id,
+                a1.join_at as join_at,
+                a1.type as type
+            from account
+            left join agency a1 on account.id = a1.account_id
+            where
+                account.id = ${account_id}
+            union
+                select
+                    a.id as id,
+                    a.referer_id as referer_id,
+                    a.email as email,
+                    a2.id as agency_id,
+                    a2.join_at as join_at,
+                    a2.type as type
+                from
+                    account a
+                left join agency a2 on a.id = a2.account_id
+                inner join temp_table s on s.referer_id = a.id
+        ) select * from temp_table 
+        `);
         return ancestors;
     }
 
@@ -126,14 +152,14 @@ export class AccountService {
                 left join agency a2 on a.id = a2.account_id
                 inner join temp_table s on s.id = a.referer_id
         ) select * from temp_table 
-        `)
-        
-            console.log(descendants)
-            // .getTreeRepository(AccountEntity)
-            // .createDescendantsQueryBuilder('account', 'accountClosure', account)
-            // .leftJoinAndSelect('account.agency', 'agency')
-            // // .orderBy('account.mpath', 'ASC')
-            // .getMany();
+        `);
+
+        console.log(descendants);
+        // .getTreeRepository(AccountEntity)
+        // .createDescendantsQueryBuilder('account', 'accountClosure', account)
+        // .leftJoinAndSelect('account.agency', 'agency')
+        // // .orderBy('account.mpath', 'ASC')
+        // .getMany();
 
         // if (descendants.length > 1 && descendants[descendants.length - 1].id === account_id) {
         //     // descendants.splice(descendants.length - 1, 1)
@@ -150,7 +176,7 @@ export class AccountService {
                 is_root: true,
             })
             // .leftJoinAndSelect('account.vendor', 'vendor')
-            .getMany()
+            .getMany();
         // const rootAccounts = await this.accountRepository.findBy({
         //     is_root: true,
         // });
