@@ -11,6 +11,7 @@ import { ResponseDto } from 'src/shared/dto/responseDto';
 import { AccountService } from '../account/account.service';
 import { SecondaryTransactionService } from '../secondary-transaction/secondary-transaction.service';
 import { TransactionService } from '../transaction/transaction.service';
+import { ApproveRechargeMoneyDto } from './dto/approveRechargeMoneyDto';
 import { RechargeMoneyDto } from './dto/rechargeMoneyDto';
 import { TransferMoneyDto } from './dto/transferMoneyDto';
 import { WalletDto } from './dto/WalletDto';
@@ -51,6 +52,15 @@ export class WalletController {
         const transaction = await this.walletService.recharge(
             rechargeMoneyDto.account_id,
             rechargeMoneyDto.amount,
+        );
+
+        return new ResponseDto(transaction, true, 'Thành công');
+    }
+
+    @Post('/approve-recharge')
+    async approveRecharge(@Body() approveRechargeDto: ApproveRechargeMoneyDto) {
+        const transaction = await this.walletService.approveRecharge(
+            approveRechargeDto.recharge_register_id
         );
 
         return new ResponseDto(transaction, true, 'Thành công');

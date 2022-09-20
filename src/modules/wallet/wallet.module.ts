@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccountModule } from '../account/account.module';
+import { RechargeRegisterModule } from '../recharge-register/recharge-register.module';
 import { ReferralModule } from '../referral/referral.module';
 import { SecondaryTransactionModule } from '../secondary-transaction/secondary-transaction.module';
 import { TransactionModule } from '../transaction/transaction.module';
@@ -15,6 +16,7 @@ import { WalletService } from './wallet.service';
         ReferralModule,
         SecondaryTransactionModule,
         VendorModule,
+        RechargeRegisterModule
     ],
     providers: [WalletService],
     controllers: [WalletController],

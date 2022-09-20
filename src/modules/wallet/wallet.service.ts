@@ -4,6 +4,11 @@ import { HelperService } from 'src/shared/services/helper.service';
 import { DataSource, Repository } from 'typeorm';
 import { AccountEntity } from '../account/account.entity';
 import { AccountService } from '../account/account.service';
+import {
+    RechargeRegisterEntity,
+    RechargeRegisterStatus,
+} from '../recharge-register/recharge-register.entity';
+import { RechargeRegisterService } from '../recharge-register/recharge-register.service';
 import { SecondaryTransactionService } from '../secondary-transaction/secondary-transaction.service';
 import {
     TransactionEntity,
@@ -23,6 +28,7 @@ export class WalletService {
         private secondaryTransactionService: SecondaryTransactionService,
         private accountService: AccountService,
         private vendorService: VendorService,
+        private rechargeRegisterService: RechargeRegisterService,
         private dataSource: DataSource,
         private readonly helperService: HelperService,
     ) {}
@@ -191,6 +197,34 @@ export class WalletService {
             type: TransactionTypeEnum.RECHARGE,
             status: TransactionStatusEnum.SUCCESS,
         });
+
+        return transaction;
+    }
+
+    async approveRecharge(
+        rechargeRegisterId: number,
+        // ): Promise<RechargeRegisterEntity> {
+    ): Promise<TransactionEntity> {
+        const register = await this.rechargeRegisterService.find(
+            rechargeRegisterId,
+        );
+        if (register.status !== RechargeRegisterStatus.CREATED) {
+            throw new HttpException(
+                'Mã này đã đăng ký thành công',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        const transaction = await this.transactionService.create({
+            amount: register.amount,
+            source_id: null,
+            target_id: register.account_id,
+            type: TransactionTypeEnum.RECHARGE,
+            status: TransactionStatusEnum.SUCCESS,
+        });
+
+        register.status = RechargeRegisterStatus.ACCEPTED;
+        await register.save();
 
         return transaction;
     }

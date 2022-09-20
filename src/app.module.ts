@@ -22,6 +22,7 @@ import { ResumeModule } from './modules/resume/resume.module';
 import { VendorModule } from './modules/vendor/vendor.module';
 import { BillInfoModule } from './modules/bill-info/bill-info.module';
 import { ErpAccountModule } from './modules/erp-account/erp-account.module';
+import { RechargeRegisterModule } from './modules/recharge-register/recharge-register.module';
 
 @Module({
     imports: [
@@ -48,6 +49,7 @@ import { ErpAccountModule } from './modules/erp-account/erp-account.module';
         VendorModule,
         BillInfoModule,
         ErpAccountModule,
+        RechargeRegisterModule,
     ],
     controllers: [AppController],
     providers: [AppService],
